@@ -6,6 +6,6 @@ contract Lottery {
     address public manager;
 
     constructor() {
-        
+        manager = msg.sender;
     }
 }
