@@ -20,6 +20,8 @@ contract Lottery {
         uint index = random() % players.length;
         address payable winner = payable(players[index]);
         winner.transfer(address(this).balance);
+
+        players = new address[](0);
     }
 
     function random() private view returns (uint) {
