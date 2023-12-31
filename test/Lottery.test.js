@@ -27,4 +27,23 @@ describe('Lottery Contract', () => {
     it('deploys a contract', () => {
         assert.ok(lottery.options.address);
     });
+
+    it('allows one account to enter', async () => {
+        let players = await lottery.methods.getPlayers().call({
+            from: accounts[0]
+        });
+        // Make sure no players has not yet entered in the lottery
+        assert.equal(0, players.length);
+
+        await lottery.methods.enter().send({
+            from: accounts[0],
+            value: web3.utils.toWei('0.02', 'ether'),
+        });
+        
+        players = await lottery.methods.getPlayers().call({
+            from: accounts[0]
+        });
+        assert.equal(1, players.length);
+        assert.equal(accounts[0], players[0]);
+    });
 });
