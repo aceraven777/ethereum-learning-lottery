@@ -10,15 +10,18 @@ contract Lottery {
         manager = msg.sender;
     }
 
+    modifier restricted() {
+        require(msg.sender == manager);
+        _;
+    }
+
     function enter() external payable {
         require(msg.value > 0.01 ether);
 
         players.push(msg.sender);
     }
 
-    function pickWinner() external {
-        require(msg.sender == manager);
-
+    function pickWinner() external restricted {
         uint index = random() % players.length;
         address payable winner = payable(players[index]);
         winner.transfer(address(this).balance);
