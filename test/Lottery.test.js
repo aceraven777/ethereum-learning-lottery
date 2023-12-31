@@ -80,7 +80,26 @@ describe('Lottery Contract', () => {
                 value: 200,
             });
         } catch (err) {
-            hasErrorOccurred = true
+            hasErrorOccurred = true;
+        }
+
+        assert(hasErrorOccurred);
+    });
+
+    it('only manager can call pickWinner', async () => {
+        let hasErrorOccurred = false;
+
+        try {
+            await lottery.methods.enter().send({
+                from: accounts[1],
+                value: web3.utils.toWei('0.02', 'ether'),
+            });
+            
+            await lottery.methods.pickWinner().send({
+                from: accounts[1],
+            });
+        } catch (err) {
+            hasErrorOccurred = true;
         }
 
         assert(hasErrorOccurred);
