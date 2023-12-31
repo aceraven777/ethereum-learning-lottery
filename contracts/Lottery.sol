@@ -17,6 +17,8 @@ contract Lottery {
     }
 
     function pickWinner() external {
+        require(msg.sender == manager);
+
         uint index = random() % players.length;
         address payable winner = payable(players[index]);
         winner.transfer(address(this).balance);
