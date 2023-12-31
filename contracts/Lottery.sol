@@ -29,6 +29,10 @@ contract Lottery {
         players = new address[](0);
     }
 
+    function getPlayers() external view returns (address[] memory) {
+        return players;
+    }
+
     function random() private view returns (uint) {
         return uint(keccak256(abi.encodePacked(block.difficulty, block.timestamp, players)));
     }
