@@ -22,3 +22,9 @@ beforeEach(async () => {
             gas: '1000000'
         });
 });
+
+describe('Lottery Contract', () => {
+    it('deploys a contract', () => {
+        assert.ok(lottery.options.address);
+    });
+});
