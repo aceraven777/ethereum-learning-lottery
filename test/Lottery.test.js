@@ -1,7 +1,8 @@
 const assert = require('assert');
 const ganache = require('ganache');
 const { Web3 } = require('web3');
-const web3 = new Web3(ganache.provider());
+const provider = ganache.provider();
+const web3 = new Web3(provider);
 const { abi, evm } = require('../compile');
 
 let accounts;
@@ -46,6 +47,10 @@ describe('Lottery Contract', () => {
         });
         assert.equal(1, players.length);
         assert.equal(accounts[0], players[0]);
+
+        // Assert contract has balance
+        const balance = await web3.eth.getBalance(lottery.options.address);
+        assert.equal(web3.utils.toWei('0.02', 'ether'), balance);
     });
 
     it('allows multiple accounts to enter', async () => {
@@ -55,11 +60,11 @@ describe('Lottery Contract', () => {
         });
         await lottery.methods.enter().send({
             from: accounts[1],
-            value: web3.utils.toWei('0.02', 'ether'),
+            value: web3.utils.toWei('0.06', 'ether'),
         });
         await lottery.methods.enter().send({
             from: accounts[2],
-            value: web3.utils.toWei('0.02', 'ether'),
+            value: web3.utils.toWei('0.05', 'ether'),
         });
         
         players = await lottery.methods.getPlayers().call({
@@ -69,6 +74,10 @@ describe('Lottery Contract', () => {
         assert.equal(accounts[0], players[0]);
         assert.equal(accounts[1], players[1]);
         assert.equal(accounts[2], players[2]);
+
+        // Assert contract has balance
+        const balance = await web3.eth.getBalance(lottery.options.address);
+        assert.equal(web3.utils.toWei('0.13', 'ether'), balance);
     });
 
     it('requires a minimum amount of ether to enter', async () => {
@@ -103,5 +112,31 @@ describe('Lottery Contract', () => {
         }
 
         assert(hasErrorOccurred);
+    });
+
+    it('sends money to the winner and resets the players array', async () => {
+        const sendValue = BigInt(web3.utils.toWei('2', 'ether'));
+        await lottery.methods.enter().send({
+            from: accounts[1],
+            value: sendValue,
+        });
+
+        const initialBalance = await web3.eth.getBalance(accounts[1]);
+        await lottery.methods.pickWinner().send({
+            from: accounts[0],
+        });
+        const finalBalance = await web3.eth.getBalance(accounts[1]);
+
+        assert(initialBalance + sendValue == finalBalance)
+
+        // Assert players array is reset
+        let players = await lottery.methods.getPlayers().call({
+            from: accounts[0]
+        });
+        assert.equal(0, players.length);
+
+        // Assert contract balance is zero
+        const balance = await web3.eth.getBalance(lottery.options.address);
+        assert.equal(0, balance);
     });
 });
