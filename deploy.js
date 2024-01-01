@@ -28,6 +28,7 @@ const deploy = async () => {
             gas: '1000000'
         });
 
+    console.log(JSON.stringify(abi));
     console.log('Contract deployed to', result.options.address);
     provider.engine.stop();
 };
